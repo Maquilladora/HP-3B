@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HP Classe</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 10px;
+}
+
+.student {
+    background: white;
+    padding: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.name {
+    width: 90px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.hp-bar {
+    display: flex;
+    gap: 2px;
+}
+
+.pixel {
+    width: 6px;
+    height: 14px;
+    background: #ccc;
+}
+
+.pixel.full {
+    background: #2ecc71;
+}
+
+.controls button {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h3>Barra vita classe</h3>
+<div id="classroom"></div>
+
+<script>
+const MAX_HP = 100;
+const PIXELS = 20;
+const STORAGE_KEY = "hp_classe";
+
+const defaultStudents = [
+    { name: "Luca", hp: 100 },
+    { name: "Sara", hp: 100 },
+    { name: "Marco", hp: 100 },
+    { name: "Giulia", hp: 100 }
+];
+
+let students = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultStudents;
+
+function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+}
+
+function render() {
+    const container = document.getElementById("classroom");
+    container.innerHTML = "";
+
+    students.forEach(student => {
+        const row = document.createElement("div");
+        row.className = "student";
+
+        const name = document.createElement("div");
+        name.className = "name";
+        name.textContent = student.name;
+
+        const bar = document.createElement("div");
+        bar.className = "hp-bar";
+
+        const filled = Math.round((student.hp / MAX_HP) * PIXELS);
+
+        for (let i = 0; i < PIXELS; i++) {
+            const p = document.createElement("div");
+            p.className = "pixel";
+            if (i < filled) p.classList.add("full");
+            bar.appendChild(p);
+        }
+
+        const controls = document.createElement("div");
+        controls.className = "controls";
+
+        const minus = document.createElement("button");
+        minus.textContent = "−";
+        minus.onclick = () => {
+            student.hp = Math.max(0, student.hp - 1);
+            save();
+            render();
+        };
+
+        const plus = document.createElement("button");
+        plus.textContent = "+";
+        plus.onclick = () => {
+            student.hp = Math.min(MAX_HP, student.hp + 1);
+            save();
+            render();
+        };
+
+        controls.appendChild(minus);
+        controls.appendChild(plus);
+
+        row.appendChild(name);
+        row.appendChild(bar);
+        row.appendChild(controls);
+
+        container.appendChild(row);
+    });
+}
+
+render();
+</script>
+
+</body>
+</html>
