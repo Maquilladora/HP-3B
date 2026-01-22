@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BARRE DELLA VITA 3B</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+body {
+    font-family: 'Press Start 2P', monospace;
+    background: #111;
+    color: #fff;
+    padding: 10px;
+    font-size: 10px;
+}
+
+h3 {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.student {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.name {
+    width: 120px;
+}
+
+.hp-frame {
+    width: 120px;
+    height: 16px;
+    border: 2px solid #fff;
+    padding: 1px;
+    position: relative;
+}
+
+.hp-bar {
+    height: 100%;
+    background: #2ecc71;
+}
+
+.hp-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 1px;
+    font-size: 8px;
+}
+
+.controls button {
+    width: 32px;
+    height: 32px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    background: #222;
+    color: #777;
+    border: 2px solid #555;
+}
+</style>
+</head>
+
+<body>
+
+<h3>BARRE DELLA VITA 3B</h3>
+<div id="classroom"></div>
+
+<script>
+const MAX_HP = 100;
+
+/* 1muPCCfToWGHPeoJGd5f3rmZNMVBW_i2MEe6jacXCWpA */
+const SHEET_ID = "ID_FOGLIO";
+
+/* URL pubblico CSV del foglio */
+const SHEET_URL =
+  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+
+/* COLORE HP */
+function hpColor(hp) {
+    if (hp < 15) return "#e74c3c";   // rosso
+    if (hp < 50) return "#f1c40f";   // giallo
+    return "#2ecc71";               // verde
+}
+
+/* CARICAMENTO DATI DAL FOGLIO */
+async function loadStudents() {
+    const res = await fetch(SHEET_URL);
+    const text = await res.text();
+    const rows = text.trim().split("\n").slice(1);
+
+    return rows.map(r => {
+        const [name, hp] = r.split(",");
+        return {
+            name: name.replace(/"/g, ""),
+            hp: parseInt(hp)
+        };
+    });
+}
+
+/* RENDER */
+async function render() {
+    const students = await loadStudents();
+    const container = document.getElementById("classroom");
+    container.innerHTML = "";
+
+    students.forEach(student => {
+        const row = document.createElement("div");
+        row.className = "student";
+
+        const name = document.createElement("div");
+        name.className = "name";
+        name.textContent = student.name;
+
+        const frame = document.createElement("div");
+        frame.className = "hp-frame";
+
+        const bar = document.createElement("div");
+        bar.className = "hp-bar";
+        bar.style.width = (student.hp / MAX_HP * 100) + "%";
+        bar.style.background = hpColor(student.hp);
+
+        const text = document.createElement("div");
+        text.className = "hp-text";
+        text.textContent = student.hp + " HP";
+
+        frame.appendChild(bar);
+        frame.appendChild(text);
+
+        const controls = document.createElement("div");
+        controls.className = "controls";
+
+        const minus = document.createElement("button");
+        minus.textContent = "−";
+        minus.disabled = true;
+
+        const plus = document.createElement("button");
+        plus.textContent = "+";
+        plus.disabled = true;
+
+        controls.appendChild(minus);
+        controls.appendChild(plus);
+
+        row.appendChild(name);
+        row.appendChild(frame);
+        row.appendChild(controls);
+
+        container.appendChild(row);
+    });
+}
+
+render();
+</script>
+
+</body>
+</html>
